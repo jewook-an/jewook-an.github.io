@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>국채 포트폴리오 대시보드</title>
+  <style>
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f5f7fa;
+      color: #333;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      background-color: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .portfolio-info {
+      flex: 1;
+    }
+    
+    .portfolio-controls {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .btn {
+      padding: 8px 15px;
+      background-color: #3182ce;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    
+    .btn-secondary {
+      background-color: #718096;
+    }
+    
+    .card {
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+    
+    .full-width {
+      grid-column: 1 / -1;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    table th, table td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    
+    table th {
+      background-color: #f7fafc;
+    }
+    
+    .chart-container {
+      height: 300px;
+      position: relative;
+    }
+    
+    .stats-container {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+    }
+    
+    .stat-card {
+      background-color: #f7fafc;
+      padding: 15px;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .stat-title {
+      font-size: 14px;
+      color: #718096;
+      margin-bottom: 5px;
+    }
+    
+    .stat-value {
+      font-size: 24px;
+      font-weight: bold;
+      color: #2d3748;
+    }
+    
+    .stat-change {
+      margin-top: 5px;
+      font-size: 12px;
+    }
+    
+    .positive {
+      color: #38a169;
+    }
+    
+    .negative {
+      color: #e53e3e;
+    }
+    
+    /* 원형 그래프를 표현하기 위한 가상의 스타일 */
+    .pie-chart {
+      width: 200px;
+      height: 200px;
+      position: relative;
+      border-radius: 50%;
+      background: conic-gradient(
+        #3182ce 0% 40%,
+        #4299e1 40% 65%,
+        #63b3ed 65% 85%,
+        #90cdf4 85% 100%
+      );
+      margin: 0 auto;
+    }
+    
+    /* 막대 그래프를 표현하기 위한 가상의 스타일 */
+    .bar-chart {
+      display: flex;
+      height: 200px;
+      align-items: flex-end;
+      gap: 15px;
+      margin: 20px 0;
+    }
+    
+    .bar {
+      flex: 1;
+      background-color: #3182ce;
+      position: relative;
+    }
+    
+    .bar:nth-child(1) { height: 60%; }
+    .bar:nth-child(2) { height: 80%; }
+    .bar:nth-child(3) { height: 40%; }
+    .bar:nth-child(4) { height: 90%; }
+    .bar:nth-child(5) { height: 70%; }
+    
+    .bar-label {
+      position: absolute;
+      bottom: -25px;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      font-size: 12px;
+    }
+    
+    .filter-container {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    
+    .filter-select {
+      padding: 8px;
+      border-radius: 4px;
+      border: 1px solid #e2e8f0;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="portfolio-info">
+        <h2>국채 포트폴리오 #KTB-2025</h2>
+        <p>포트폴리오 유형: 국채형 | 상위 포트폴리오: 채권 마스터 | 거래원: KB증권</p>
+      </div>
+      <div class="portfolio-controls">
+        <button class="btn">수정</button>
+        <button class="btn btn-secondary">내보내기</button>
+        <button class="btn btn-secondary">보고서</button>
+      </div>
+    </div>
+    
+    <div class="stats-container">
+      <div class="stat-card">
+        <span class="stat-title">총 평가금액</span>
+        <span class="stat-value">52.38억원</span>
+        <span class="stat-change positive">+0.32% (전일대비)</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-title">평균 듀레이션</span>
+        <span class="stat-value">4.82년</span>
+        <span class="stat-change">변동없음</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-title">평균 YTM</span>
+        <span class="stat-value">3.21%</span>
+        <span class="stat-change negative">-0.03%p (전일대비)</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-title">평균 신용등급</span>
+        <span class="stat-value">AAA</span>
+        <span class="stat-change">국채</span>
+      </div>
+    </div>
+    
+    <div class="grid">
+      <div class="card">
+        <div class="card-header">
+          <h3>국채 유형별 비중</h3>
+          <div class="filter-container">
+            <select class="filter-select">
+              <option>금액 기준</option>
+              <option>수량 기준</option>
+            </select>
+          </div>
+        </div>
+        <div class="chart-container">
+          <div class="pie-chart"></div>
+          <div style="text-align: center; margin-top: 20px;">
+            <div style="display: flex; justify-content: center; gap: 20px;">
+              <div><span style="display: inline-block; width: 12px; height: 12px; background-color: #3182ce; margin-right: 5px;"></span>국고채 (40%)</div>
+              <div><span style="display: inline-block; width: 12px; height: 12px; background-color: #4299e1; margin-right: 5px;"></span>통안채 (25%)</div>
+              <div><span style="display: inline-block; width: 12px; height: 12px; background-color: #63b3ed; margin-right: 5px;"></span>국민주택채권 (20%)</div>
+              <div><span style="display: inline-block; width: 12px; height: 12px; background-color: #90cdf4; margin-right: 5px;"></span>외평채 (15%)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-header">
+          <h3>만기구조 분석</h3>
+          <div class="filter-container">
+            <select class="filter-select">
+              <option>전체</option>
+              <option>유형별</option>
+            </select>
+          </div>
+        </div>
+        <div class="chart-container">
+          <div class="bar-chart">
+            <div class="bar">
+              <div class="bar-label">1년</div>
+            </div>
+            <div class="bar">
+              <div class="bar-label">3년</div>
+            </div>
+            <div class="bar">
+              <div class="bar-label">5년</div>
+            </div>
+            <div class="bar">
+              <div class="bar-label">10년</div>
+            </div>
+            <div class="bar">
+              <div class="bar-label">20년</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card full-width">
+        <div class="card-header">
+          <h3>보유 종목 현황</h3>
+          <div class="filter-container">
+            <input type="text" placeholder="종목 검색" class="filter-select">
+            <select class="filter-select">
+              <option>전체</option>
+              <option>국고채</option>
+              <option>통안채</option>
+              <option>국민주택채권</option>
+              <option>외평채</option>
+            </select>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>종목코드</th>
+              <th>채권명</th>
+              <th>유형</th>
+              <th>표면금리</th>
+              <th>만기일</th>
+              <th>보유수량</th>
+              <th>평가금액</th>
+              <th>듀레이션</th>
+              <th>YTM</th>
+              <th>평가손익</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>KR103501GC30</td>
+              <td>국고채권03500-2503</td>
+              <td>국고채</td>
+              <td>3.50%</td>
+              <td>2025-03-10</td>
+              <td>500,000,000</td>
+              <td>5.12억원</td>
+              <td>1.18</td>
+              <td>3.10%</td>
+              <td class="positive">+5,600,000원</td>
+            </tr>
+            <tr>
+              <td>KR103502GD93</td>
+              <td>국고채권03500-2909</td>
+              <td>국고채</td>
+              <td>3.50%</td>
+              <td>2029-09-10</td>
+              <td>1,000,000,000</td>
+              <td>10.23억원</td>
+              <td>4.25</td>
+              <td>3.22%</td>
+              <td class="negative">-8,300,000원</td>
+            </tr>
+            <tr>
+              <td>KR310101GD32</td>
+              <td>통안00500-2603-02</td>
+              <td>통안채</td>
+              <td>0.50%</td>
+              <td>2026-03-02</td>
+              <td>800,000,000</td>
+              <td>7.92억원</td>
+              <td>2.15</td>
+              <td>3.15%</td>
+              <td class="positive">+3,400,000원</td>
+            </tr>
+            <tr>
+              <td>KR350101GCB3</td>
+              <td>국주00750-2511-01</td>
+              <td>국민주택채권</td>
+              <td>0.75%</td>
+              <td>2025-11-30</td>
+              <td>1,200,000,000</td>
+              <td>11.82억원</td>
+              <td>1.65</td>
+              <td>3.25%</td>
+              <td class="positive">+7,800,000원</td>
+            </tr>
+            <tr>
+              <td>KR380101GDB1</td>
+              <td>외평채</td>
+              <td>외국환평형기금채권</td>
+              <td>3.75%</td>
+              <td>2033-11-10</td>
+              <td>1,500,000,000</td>
+              <td>15.45억원</td>
+              <td>7.62</td>
+              <td>3.30%</td>
+              <td class="positive">+15,200,000원</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <div class="card">
+        <div class="card-header">
+          <h3>현금흐름 분석</h3>
+        </div>
+        <div class="chart-container">
+          <!-- 현금흐름 차트 위치 -->
+          <p style="text-align: center; padding-top: 130px;">현금흐름 차트가 표시됩니다</p>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-header">
+          <h3>금리 민감도 분석</h3>
+        </div>
+        <div class="chart-container">
+          <!-- 금리 민감도 차트 위치 -->
+          <p style="text-align: center; padding-top: 130px;">금리 민감도 분석 차트가 표시됩니다</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
