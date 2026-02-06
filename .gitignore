@@ -1,0 +1,11 @@
+# Temporary files
+tmpclaude-*
+
+# Project source files (only track built output in project folder)
+project-src/node_modules/
+project-src/dist/
+project-src/.DS_Store
+project-src/*.local
+project-src/.eslintcache
+project-src/test-results/
+project-src/playwright-report/
