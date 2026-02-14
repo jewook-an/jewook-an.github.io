@@ -19,19 +19,19 @@ const mockPositionDetails = {
     viewCount: 234,
     description: `
       삼성생명에서 보험계리사를 모집합니다.
-      
+
       ▶ 주요 업무
       • 보험 상품 가격 산정 및 리스크 분석
       • 재무 건전성 평가 및 보고서 작성
       • 자산부채 종합평가(ALM) 업무 수행
       • 규제 대응 및 준법감시 업무 지원
-      
+
       ▶ 자격 요건
       • 보험계리사 자격증 소지자 (필수)
       • 보험업계 경력 3~5년
       • 통계, 수학, 경제학 등 관련 전공자 우대
       • Excel, R, Python 등 데이터 분석 도구 활용 가능자
-      
+
       ▶ 우대 사항
       • 생명보험회사 근무 경험자
       • 영어 능통자 (TOEIC 850 이상)
@@ -70,19 +70,19 @@ const mockPositionDetails = {
     viewCount: 189,
     description: `
       현대해상에서 경험 많은 언더라이터를 모집합니다.
-      
+
       ▶ 주요 업무
       • 보험 청약 심사 및 위험 평가
       • 보험료 산정 및 인수 조건 결정
       • 재보험 업무 처리
       • 언더라이팅 가이드라인 개선
-      
+
       ▶ 자격 요건
       • 손해보험 언더라이팅 경력 5년 이상
       • 보험 관련 자격증 보유자 우대
       • 리스크 분석 능력 우수자
       • 원활한 커뮤니케이션 능력
-      
+
       ▶ 우대 사항
       • 재보험 업무 경험자
       • 외국계 보험사 근무 경험자
@@ -112,7 +112,7 @@ const PositionDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [isBookmarked, setIsBookmarked] = useState(false);
-  
+
   const position = mockPositionDetails[id] || mockPositionDetails[1];
 
   const handleApply = () => {
@@ -160,7 +160,7 @@ const PositionDetailPage = () => {
             </div>
           </div>
           <div className="header-right">
-            <button 
+            <button
               className={`btn-bookmark ${isBookmarked ? 'bookmarked' : ''}`}
               onClick={handleBookmark}
             >
@@ -206,9 +206,9 @@ const PositionDetailPage = () => {
                   <span className="value">{position.companyInfo.employees}</span>
                 </div>
               </div>
-              <a 
-                href={position.companyInfo.website} 
-                target="_blank" 
+              <a
+                href={position.companyInfo.website}
+                target="_blank"
                 rel="noopener noreferrer"
                 className="company-link"
               >
