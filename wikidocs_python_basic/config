@@ -1,0 +1,11 @@
+[core]
+	repositoryformatversion = 0
+	filemode = false
+	bare = true
+	symlinks = false
+	ignorecase = true
+[remote "origin"]
+	url = https://github.com/jewook-an/wikidocs_python_basic.git
+	fetch = +refs/*:refs/*
+	mirror = true
+	pushurl = https://github.com/jewook-an/Python.git/wikidocs_python_basic
