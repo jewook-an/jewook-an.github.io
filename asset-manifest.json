@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/bhinsearch/static/css/main.ad89e2b2.css",
+    "main.js": "/bhinsearch/static/js/main.292a94e8.js",
+    "static/js/453.4b1bb459.chunk.js": "/bhinsearch/static/js/453.4b1bb459.chunk.js",
+    "index.html": "/bhinsearch/index.html",
+    "main.ad89e2b2.css.map": "/bhinsearch/static/css/main.ad89e2b2.css.map",
+    "main.292a94e8.js.map": "/bhinsearch/static/js/main.292a94e8.js.map",
+    "453.4b1bb459.chunk.js.map": "/bhinsearch/static/js/453.4b1bb459.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.ad89e2b2.css",
+    "static/js/main.292a94e8.js"
+  ]
+}
