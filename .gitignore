@@ -9,3 +9,4 @@ project-src/*.local
 project-src/.eslintcache
 project-src/test-results/
 project-src/playwright-report/
+bhinsearch.7z
