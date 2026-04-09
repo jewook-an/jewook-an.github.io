@@ -19,3 +19,5 @@ dist/
 # Test results
 test-results/
 playwright-report/
+
+checklist.txt

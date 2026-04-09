@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ABL생명 투입준비 Todo List</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f0;padding:2rem;color:#1a1a1a;}
+  h1{font-size:18px;font-weight:500;margin-bottom:1.5rem;color:#1a1a1a;}
+  .tab-row{display:flex;gap:6px;margin-bottom:1.5rem;flex-wrap:wrap;}
+  .tab{padding:6px 16px;font-size:13px;font-weight:500;border:0.5px solid #bbb;border-radius:8px;cursor:pointer;background:#fff;color:#666;}
+  .tab.active{background:#dbeafe;color:#1d4ed8;border-color:transparent;}
+  .panel{display:none;}
+  .panel.active{display:block;}
+  .section{margin-bottom:1.5rem;}
+  .section-title{font-size:13px;font-weight:500;color:#666;margin-bottom:8px;padding-bottom:6px;border-bottom:0.5px solid #e0e0e0;}
+  .item{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:0.5px solid #ebebeb;}
+  .item:last-child{border-bottom:none;}
+  .checkbox{width:17px;height:17px;min-width:17px;border:0.5px solid #bbb;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-top:1px;background:#fff;}
+  .checkbox.checked{background:#dcfce7;border-color:transparent;}
+  .checkbox.checked::after{content:'';display:block;width:5px;height:9px;border:2px solid #16a34a;border-top:none;border-left:none;transform:rotate(45deg) translate(-1px,-1px);}
+  .item-text{font-size:14px;color:#1a1a1a;line-height:1.5;flex:1;}
+  .item-text.done{color:#999;text-decoration:line-through;}
+  .item-sub{font-size:12px;color:#888;margin-top:2px;}
+  .badge{display:inline-block;font-size:11px;font-weight:500;padding:2px 7px;border-radius:6px;margin-left:6px;vertical-align:middle;}
+  .b-warn{background:#fef9c3;color:#a16207;}
+  .b-info{background:#dbeafe;color:#1d4ed8;}
+  .b-suc{background:#dcfce7;color:#16a34a;}
+  .code-block{background:#f5f5f0;border:0.5px solid #ddd;border-radius:8px;padding:1rem 1.25rem;font-family:'Courier New',monospace;font-size:12px;color:#1a1a1a;line-height:1.8;margin-top:8px;white-space:pre-wrap;overflow-x:auto;}
+  .progress-bar{height:4px;background:#e0e0e0;border-radius:2px;margin-bottom:1.5rem;}
+  .progress-fill{height:4px;background:#16a34a;border-radius:2px;transition:width 0.3s;}
+  .progress-label{font-size:12px;color:#888;margin-bottom:6px;}
+  .info-block{font-size:13px;color:#555;line-height:1.9;background:#f5f5f0;border-radius:8px;padding:1rem 1.25rem;}
+  .container{max-width:760px;margin:0 auto;background:#fff;border-radius:12px;padding:1.5rem;border:0.5px solid #e0e0e0;}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>ABL생명 투입준비 Todo List</h1>
+
+  <div class="tab-row">
+    <div class="tab active" onclick="switchTab('pc')">PC 세팅</div>
+    <div class="tab" onclick="switchTab('pre')">선작업 Todo</div>
+    <div class="tab" onclick="switchTab('batch')">배치 프로세스</div>
+    <div class="tab" onclick="switchTab('example')">배치 예제</div>
+  </div>
+
+  <!-- PC 세팅 -->
+  <div class="panel active" id="tab-pc">
+    <div class="progress-label" id="pc-prog-label">0 / 0 완료</div>
+    <div class="progress-bar"><div class="progress-fill" id="pc-prog" style="width:0%"></div></div>
+
+    <div class="section">
+      <div class="section-title">JDK / 빌드 환경</div>
+      <div class="item"><div class="checkbox" onclick="toggle(this)"></div><div class="item-text">JDK 설치 (현장 사용 버전 확인 후 — 11 또는 17 권장)<span class="badge b-warn">필수</span><div class="item-sub">현장 Java 버전 첫날 반드시 확인</div></div></div>
+      <div class="item"><div class="checkbox" onclick="toggle(this)"></div><div class="item-text">Maven 또는 Gradle 설치 및 환경변수 설정</div></div>
+      <div class="item"><div class="checkbox" onclick="toggle(this)"></div><div class="item-text">Eclipse 또는 IntelliJ 설치<div class="item-sub">현장 표준 IDE 확인 후 맞춰서 설치</div></div></div>
+      <div class="item"><div class="checkbox" onclick="toggle(this)"></div><div class="item-text">Spring Boot 프로젝트 템플릿 생성 및 정상 빌드 확인</div></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">DB 툴</div>
+      <div class="item"><div class="checkbox" onclick="toggle(this)"></div><div class="item-text">DBeaver 설치<span class="badge b-info">범용</span><div class="item-sub">Oracle / MySQL / PostgreSQL 모두 지원</div></div></div>
+      <div class="item"><div class="checkbox" onclick="toggle(this)"></div><div class="item-text">DB 접속 정보 확인 및 연결 테스트 (Oracle 또는 MySQL)<div class="item-sub">첫날 DBA 또는 담당자에게 계정 요청</div></div></div>
+      <div class="item"><div class="checkbox" onclick="toggle(this)"></div><div class="item-text">DB Driver JAR 확보 (ojdbc, mysql-connector 등)</div></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">형상관리 / 협업 툴</div>
+      <div class="item"><div class="checkbox" onclick="toggle(this)"></div><div class="item-text">Git 또는 SVN 클라이언트 설치<div class="item-sub">현장 형상관리 툴 사전 확인</div></div></div>
+      <div class="item"><div class="checkbox" onclick="toggle(this)"></div><div class="item-text">소스 저장소 접근 권한 요청 및 초기 체크아웃</div></div>
+      <div class="item"><div class="checkbox" onclick="toggle(this)"></div><div class="item-text">Jira / Confluence 등 이슈 트래커 계정 발급 요청</div></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">기타</div>
+      <div class="item"><div class="checkbox" onclick="toggle(this)"></div><div class="item-text">VPN / 사내망 접속 설정<span class="badge b-warn">필수</span></div></div>
+      <div class="item"><div class="checkbox" onclick="toggle(this)"></div><div class="item-text">사내 보안 솔루션 설치 (DLP, 백신 등 현장 요구사항 확인)</div></div>
+      <div class="item"><div class="checkbox" onclick="toggle(this)"></div><div class="item-text">VS Code 설치 (SQL 작업 / 스크립트 편집용 보조 툴)</div></div>
+      <div class="item"><div class="checkbox" onclick="toggle(this)"></div><div class="item-text">Python 설치 (데이터 분석 보조 스크립트 필요시)</div></div>
+    </div>
+  </div>
+
+  <!-- 선작업 Todo -->
+  <div class="panel" id="tab-pre">
+    <div class="progress-label" id="pre-prog-label">0 / 0 완료</div>
+    <div class="progress-bar"><div class="progress-fill" id="pre-prog" style="width:0%"></div></div>
+
+    <div class="section">
+      <div class="section-title">도메인 파악</div>
+      <div class="item"><div class="checkbox" onclick="toggle(this)"></div><div class="item-text">사업비 배분 개념 기초 파악<div class="item-sub">직접비 / 간접비 구분, 배분동인(Cost Driver) 개념 숙지</div></div></div>
+      <div class="item"><div class="checkbox" onclick="toggle(this)"></div><div class="item-text">컨설턴트 작성 설계 문서(배분동인 정의서, 배분방식 설계서) 입수 및 정독</div></div>
+      <div class="item"><div class="checkbox" onclick="toggle(this)"></div><div class="item-text">기존 결산 배치 프로그램 소스 및 흐름 파악<div class="item-sub">어떤 테이블에서 어떤 데이터를 가져오는지 파악이 핵심</div></div></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">데이터 분석 선작업</div>
+      <div class="item"><div class="checkbox" onclick="toggle(this)"></div><div class="item-text">기간계 주요 테이블 목록 확보 (ERD 또는 테이블 정의서 요청)<span class="badge b-warn">우선순위 높음</span></div></div>
+      <div class="item"><div class="checkbox" onclick="toggle(this)"></div><div class="item-text">사업비 관련 원천 데이터 테이블 식별<div class="item-sub">보험료, 계약, 지급, 사업비 항목 테이블 위주</div></div></div>
+      <div class="item"><div class="checkbox" onclick="toggle(this)"></div><div class="item-text">샘플 데이터 추출 및 데이터 품질 확인<div class="item-sub">NULL 비율, 코드 값 정의, 이상치 여부 등 점검</div></div></div>
+      <div class="item"><div class="checkbox" onclick="toggle(this)"></div><div class="item-text">배분동인별 데이터 존재 여부 검증 SQL 작성</div></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">배치 개발 준비</div>
+      <div class="item"><div class="checkbox" onclick="toggle(this)"></div><div class="item-text">배치 프레임워크 확인 (Spring Batch / 자체 Scheduler / Quartz)<span class="badge b-info">현장 확인</span></div></div>
+      <div class="item"><div class="checkbox" onclick="toggle(this)"></div><div class="item-text">배치 실행 이력 관리 테이블 구조 파악 (기존 배치 있을 경우)</div></div>
+      <div class="item"><div class="checkbox" onclick="toggle(this)"></div><div class="item-text">배치 로그 출력 방식 및 오류 처리 기준 확인</div></div>
+      <div class="item"><div class="checkbox" onclick="toggle(this)"></div><div class="item-text">배치 실행 환경 확인 (개발 / 검증 / 운영 서버 분리 여부)</div></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">컨설턴트 협업 준비</div>
+      <div class="item"><div class="checkbox" onclick="toggle(this)"></div><div class="item-text">컨설턴트 요구사항 접수 채널 확인 (이메일 / Jira / 회의)</div></div>
+      <div class="item"><div class="checkbox" onclick="toggle(this)"></div><div class="item-text">배분 로직 전달 방식 합의 (엑셀 수식 기반 / 문서 명세 / 직접 설명)</div></div>
+      <div class="item"><div class="checkbox" onclick="toggle(this)"></div><div class="item-text">개발 산출물 형태 협의 (배치 단위, 결과 테이블 구조 등)</div></div>
+    </div>
+  </div>
+
+  <!-- 배치 프로세스 -->
+  <div class="panel" id="tab-batch">
+    <div class="section">
+      <div class="section-title">사업비 배분 배치 전체 흐름</div>
+      <div class="info-block">
+        <strong>STEP 1.</strong> 배치 시작 / 실행 이력 INSERT (배치ID, 시작시각, 상태=RUN)<br>
+        <strong>STEP 2.</strong> 기간계 원천 데이터 추출 (대상 기간, 계약/지급/사업비 데이터)<br>
+        <strong>STEP 3.</strong> 데이터 정합성 검증 (NULL 체크, 코드 유효성, 집계 기준 확인)<br>
+        <strong>STEP 4.</strong> 배분동인 계산 (건수 / 보험료 / 지급액 등 컨설턴트 설계 기준 적용)<br>
+        <strong>STEP 5.</strong> 배분율 산출 (동인별 비율 계산 → 소수점 처리 / 합계 100% 검증)<br>
+        <strong>STEP 6.</strong> 배분 결과 테이블 저장 (부서별 / 항목별 배분액 INSERT/UPDATE)<br>
+        <strong>STEP 7.</strong> 결과 검증 (배분 전후 합계 일치 여부, 이상치 확인)<br>
+        <strong>STEP 8.</strong> 배치 종료 / 이력 UPDATE (종료시각, 상태=SUCCESS/FAIL)<br>
+        <strong>STEP 9.</strong> 오류 발생 시 rollback 및 알림 처리
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">배분동인 유형 (컨설턴트 설계 기준으로 결정)</div>
+      <div class="info-block">
+        - <strong>계약 건수 기준</strong> : 부서별 보유 계약 건수 비율로 배분<br>
+        - <strong>보험료 기준</strong> : 수입보험료 금액 비율로 배분<br>
+        - <strong>지급건수/지급액 기준</strong> : 보험금 지급 건수 또는 지급액 비율로 배분<br>
+        - <strong>인원 수 기준</strong> : 부서 인원 비율로 배분 (간접 인건비 등)<br>
+        - <strong>균등 배분</strong> : 특정 동인 없이 대상 수 기준 균등 분할
+      </div>
+    </div>
+  </div>
+
+  <!-- 배치 예제 -->
+  <div class="panel" id="tab-example">
+    <div class="section">
+      <div class="section-title">Spring Batch Job 기본 구조</div>
+      <div class="code-block">@Configuration
+public class CostAllocationJobConfig {
+
+    @Bean
+    public Job costAllocationJob(JobBuilderFactory jobBuilderFactory,
+                                  Step step1, Step step2, Step step3) {
+        return jobBuilderFactory.get("costAllocationJob")
+                .start(step1)   // 원천 데이터 추출
+                .next(step2)    // 배분율 계산
+                .next(step3)    // 결과 저장
+                .build();
+    }
+
+    @Bean
+    public Step extractStep(StepBuilderFactory stepBuilderFactory) {
+        return stepBuilderFactory.get("extractStep")
+                .&lt;SourceData, SourceData&gt;chunk(1000)
+                .reader(sourceDataReader())
+                .writer(stagingTableWriter())
+                .build();
+    }
+}</div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">배분율 계산 쿼리 예제 (계약 건수 기준)</div>
+      <div class="code-block">-- 부서별 계약 건수 집계
+SELECT
+    dept_cd,
+    COUNT(*) AS contract_cnt,
+    ROUND(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER(), 4) AS alloc_ratio
+FROM tb_contract
+WHERE
+    base_ym = :baseYm
+    AND status_cd = 'ACTIVE'
+GROUP BY dept_cd;
+
+-- 배분액 계산 및 저장
+INSERT INTO tb_cost_alloc_result (
+    base_ym, cost_item_cd, dept_cd, alloc_ratio, alloc_amt, reg_dt
+)
+SELECT
+    :baseYm,
+    :costItemCd,
+    d.dept_cd,
+    d.alloc_ratio,
+    ROUND(:totalCostAmt * d.alloc_ratio / 100, 0) AS alloc_amt,
+    SYSDATE
+FROM v_dept_alloc_ratio d;</div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">배치 실행 이력 관리 테이블 예제</div>
+      <div class="code-block">CREATE TABLE tb_batch_hist (
+    batch_id     VARCHAR2(30)  NOT NULL,   -- 배치 식별자
+    base_ym      CHAR(6)       NOT NULL,   -- 대상 기준 년월 (YYYYMM)
+    start_dt     DATE,                     -- 시작 일시
+    end_dt       DATE,                     -- 종료 일시
+    status_cd    VARCHAR2(10),             -- RUN / SUCCESS / FAIL
+    total_cnt    NUMBER,                   -- 처리 건수
+    error_msg    VARCHAR2(1000),           -- 오류 메시지
+    reg_dt       DATE DEFAULT SYSDATE
+);</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function switchTab(id) {
+    const ids = ['pc','pre','batch','example'];
+    document.querySelectorAll('.tab').forEach((t,i) => {
+      t.classList.toggle('active', ids[i] === id);
+    });
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active');
+  }
+
+  function toggle(el) {
+    el.classList.toggle('checked');
+    const textEl = el.nextElementSibling;
+    if (textEl) textEl.classList.toggle('done', el.classList.contains('checked'));
+    updateProgress();
+  }
+
+  function updateProgress() {
+    ['pc','pre'].forEach(id => {
+      const panel = document.getElementById('tab-' + id);
+      const all = panel.querySelectorAll('.checkbox').length;
+      const done = panel.querySelectorAll('.checkbox.checked').length;
+      const pct = all === 0 ? 0 : Math.round(done / all * 100);
+      document.getElementById(id + '-prog').style.width = pct + '%';
+      document.getElementById(id + '-prog-label').textContent = done + ' / ' + all + ' 완료';
+    });
+  }
+
+  updateProgress();
+</script>
+</body>
+</html>
