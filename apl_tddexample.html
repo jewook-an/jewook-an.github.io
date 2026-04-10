@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DB 쿼리 TDD 기초 예제</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f0;padding:2rem;color:#1a1a1a;}
+  .container{max-width:860px;margin:0 auto;}
+  h1{font-size:18px;font-weight:500;margin-bottom:0.25rem;}
+  .subtitle{font-size:13px;color:#888;margin-bottom:1.5rem;}
+  .tab-row{display:flex;gap:6px;margin-bottom:1.5rem;flex-wrap:wrap;}
+  .tab{padding:6px 16px;font-size:13px;font-weight:500;border:0.5px solid #bbb;border-radius:8px;cursor:pointer;background:#fff;color:#666;}
+  .tab.active{background:#dbeafe;color:#1d4ed8;border-color:transparent;}
+  .panel{display:none;}
+  .panel.active{display:block;}
+  .card{background:#fff;border:0.5px solid #e0e0e0;border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1rem;}
+  .card-title{font-size:14px;font-weight:500;color:#1a1a1a;margin-bottom:0.75rem;display:flex;align-items:center;gap:8px;}
+  .badge{display:inline-block;font-size:11px;font-weight:500;padding:2px 8px;border-radius:6px;}
+  .b-red{background:#fee2e2;color:#b91c1c;}
+  .b-grn{background:#dcfce7;color:#16a34a;}
+  .b-info{background:#dbeafe;color:#1d4ed8;}
+  .b-warn{background:#fef9c3;color:#a16207;}
+  .b-gray{background:#f1f0e8;color:#555;}
+  .tdd-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px;}
+  @media(max-width:600px){.tdd-row{grid-template-columns:1fr;}}
+  .tdd-box{border-radius:8px;padding:1rem;}
+  .tdd-red{background:#fff5f5;border:0.5px solid #fca5a5;}
+  .tdd-grn{background:#f0fdf4;border:0.5px solid #86efac;}
+  .tdd-label{font-size:11px;font-weight:500;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+  .dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+  .dot-red{background:#ef4444;}
+  .dot-grn{background:#22c55e;}
+  .dot-blue{background:#3b82f6;}
+  code{font-family:'Courier New',monospace;font-size:12px;line-height:1.8;display:block;white-space:pre-wrap;overflow-x:auto;}
+  .code-block{background:#f5f5f0;border:0.5px solid #ddd;border-radius:8px;padding:1rem 1.25rem;margin-top:10px;}
+  .code-block code{font-size:12px;}
+  .kw{color:#1d4ed8;font-weight:500;}
+  .cm{color:#888;}
+  .str{color:#16a34a;}
+  .tip{background:#f0fdf4;border-left:3px solid #16a34a;padding:0.75rem 1rem;font-size:13px;color:#374151;line-height:1.7;margin-top:10px;}
+  .warn{background:#fffbeb;border-left:3px solid #f59e0b;padding:0.75rem 1rem;font-size:13px;color:#374151;line-height:1.7;margin-top:10px;}
+  .err{background:#fff5f5;border-left:3px solid #ef4444;padding:0.75rem 1rem;font-size:13px;color:#374151;line-height:1.7;margin-top:10px;}
+  .divider{height:0.5px;background:#e0e0e0;margin:1rem 0;}
+  .step-flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:1rem;}
+  .step-box{background:#f5f5f0;border:0.5px solid #ddd;border-radius:8px;padding:6px 14px;font-size:13px;font-weight:500;color:#333;}
+  .step-arrow{color:#bbb;font-size:14px;}
+  .step-box.active-step{background:#dbeafe;border-color:#93c5fd;color:#1d4ed8;}
+  table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px;}
+  th{background:#f5f5f0;font-weight:500;color:#555;padding:8px 12px;text-align:left;border-bottom:0.5px solid #e0e0e0;}
+  td{padding:8px 12px;border-bottom:0.5px solid #ebebeb;color:#333;line-height:1.6;vertical-align:top;}
+  tr:last-child td{border-bottom:none;}
+  .result-ok{color:#16a34a;font-weight:500;}
+  .result-fail{color:#b91c1c;font-weight:500;}
+  .section-label{font-size:12px;font-weight:500;color:#888;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;margin-top:1.25rem;}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>DB 쿼리 TDD 기초 예제</h1>
+  <p class="subtitle">ABL생명 사업비 배분 프로젝트 · 주니어/중간경력자 온보딩용</p>
+
+  <div class="tab-row">
+    <div class="tab active" onclick="switchTab('concept')">TDD 개념</div>
+    <div class="tab" onclick="switchTab('setup')">테스트 테이블</div>
+    <div class="tab" onclick="switchTab('basic')">기초 쿼리</div>
+    <div class="tab" onclick="switchTab('agg')">집계 쿼리</div>
+    <div class="tab" onclick="switchTab('alloc')">배분 쿼리</div>
+    <div class="tab" onclick="switchTab('validate')">검증 쿼리</div>
+  </div>
+
+  <!-- TDD 개념 -->
+  <div class="panel active" id="tab-concept">
+    <div class="card">
+      <div class="card-title">DB 쿼리 TDD란?</div>
+      <div style="font-size:14px;color:#555;line-height:1.8;">
+        일반 TDD처럼 <strong>"테스트 먼저 → 실패 확인 → 본 쿼리 작성 → 통과 확인"</strong> 사이클을 DB 쿼리에 적용하는 방식입니다.<br><br>
+        쿼리 결과가 기대값과 일치하는지 <strong>검증 쿼리를 먼저 작성</strong>하고, 본 쿼리가 그 조건을 만족시키면 완성으로 간주합니다.
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="step-flow">
+        <div class="step-box">① 기대값 정의</div>
+        <div class="step-arrow">→</div>
+        <div class="step-box">② 검증 쿼리 작성</div>
+        <div class="step-arrow">→</div>
+        <div class="step-box">③ 실패 확인 (RED)</div>
+        <div class="step-arrow">→</div>
+        <div class="step-box">④ 본 쿼리 작성</div>
+        <div class="step-arrow">→</div>
+        <div class="step-box">⑤ 통과 확인 (GREEN)</div>
+        <div class="step-arrow">→</div>
+        <div class="step-box">⑥ 리팩토링</div>
+      </div>
+
+      <div class="tdd-row">
+        <div class="tdd-box tdd-red">
+          <div class="tdd-label"><span class="dot dot-red"></span> RED — 실패 상태 (기대값 불일치)</div>
+          <code><span class="cm">-- 검증 쿼리 먼저 작성</span>
+<span class="cm">-- 기대: A부서 계약건수 = 150</span>
+<span class="kw">SELECT</span> <span class="kw">CASE</span>
+  <span class="kw">WHEN</span> COUNT(*) = 150
+  <span class="kw">THEN</span> <span class="str">'PASS'</span>
+  <span class="kw">ELSE</span> <span class="str">'FAIL: '</span> || COUNT(*)
+<span class="kw">END</span> AS test_result
+<span class="kw">FROM</span> tb_contract
+<span class="kw">WHERE</span> dept_cd = <span class="str">'A001'</span>
+<span class="kw">AND</span>   base_ym = <span class="str">'202503'</span>;
+
+<span class="cm">-- 결과: FAIL: 0  ← 아직 데이터 없음</span></code>
+        </div>
+        <div class="tdd-box tdd-grn">
+          <div class="tdd-label"><span class="dot dot-grn"></span> GREEN — 통과 상태 (기대값 일치)</div>
+          <code><span class="cm">-- 본 쿼리(INSERT/배치) 실행 후 재검증</span>
+<span class="kw">SELECT</span> <span class="kw">CASE</span>
+  <span class="kw">WHEN</span> COUNT(*) = 150
+  <span class="kw">THEN</span> <span class="str">'PASS'</span>
+  <span class="kw">ELSE</span> <span class="str">'FAIL: '</span> || COUNT(*)
+<span class="kw">END</span> AS test_result
+<span class="kw">FROM</span> tb_contract
+<span class="kw">WHERE</span> dept_cd = <span class="str">'A001'</span>
+<span class="kw">AND</span>   base_ym = <span class="str">'202503'</span>;
+
+<span class="cm">-- 결과: PASS  ← 통과</span></code>
+        </div>
+      </div>
+      <div class="tip">핵심 원칙 : 검증 쿼리는 항상 PASS / FAIL 을 문자열로 반환하게 작성합니다. 숫자만 반환하면 기대값을 외워야 해서 주니어들이 실수합니다.</div>
+    </div>
+  </div>
+
+  <!-- 테스트 테이블 -->
+  <div class="panel" id="tab-setup">
+    <div class="card">
+      <div class="card-title">테스트용 샘플 테이블 및 데이터 세팅</div>
+      <div style="font-size:13px;color:#666;margin-bottom:10px;">실제 운영 테이블 건드리지 않고, 아래 테스트 테이블로 먼저 연습합니다.</div>
+      <div class="code-block"><code><span class="cm">-- 1. 계약 테이블</span>
+<span class="kw">CREATE TABLE</span> t_contract (
+    contract_no  VARCHAR2(20)   <span class="kw">NOT NULL</span>,
+    base_ym      CHAR(6)        <span class="kw">NOT NULL</span>,   <span class="cm">-- 기준년월 YYYYMM</span>
+    dept_cd      VARCHAR2(10),                 <span class="cm">-- 부서코드</span>
+    status_cd    VARCHAR2(10),                 <span class="cm">-- ACTIVE / CANCEL</span>
+    premium_amt  NUMBER(15,2),                 <span class="cm">-- 보험료</span>
+    reg_dt       DATE <span class="kw">DEFAULT</span> SYSDATE
+);
+
+<span class="cm">-- 2. 사업비 원천 테이블</span>
+<span class="kw">CREATE TABLE</span> t_cost_source (
+    base_ym      CHAR(6)        <span class="kw">NOT NULL</span>,
+    cost_item_cd VARCHAR2(20)   <span class="kw">NOT NULL</span>,   <span class="cm">-- 사업비 항목코드</span>
+    cost_item_nm VARCHAR2(100),
+    cost_amt     NUMBER(15,2),                 <span class="cm">-- 사업비 금액</span>
+    alloc_type   VARCHAR2(20)                  <span class="cm">-- 배분방식: CONTRACT/PREMIUM/EQUAL</span>
+);
+
+<span class="cm">-- 3. 배분 결과 테이블</span>
+<span class="kw">CREATE TABLE</span> t_cost_alloc_result (
+    base_ym      CHAR(6)        <span class="kw">NOT NULL</span>,
+    cost_item_cd VARCHAR2(20)   <span class="kw">NOT NULL</span>,
+    dept_cd      VARCHAR2(10)   <span class="kw">NOT NULL</span>,
+    alloc_ratio  NUMBER(10,6),                 <span class="cm">-- 배분율 (소수)</span>
+    alloc_amt    NUMBER(15,2),                 <span class="cm">-- 배분금액</span>
+    reg_dt       DATE <span class="kw">DEFAULT</span> SYSDATE
+);</code></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">샘플 데이터 INSERT</div>
+      <div class="code-block"><code><span class="cm">-- 계약 데이터 (3개 부서, 총 10건)</span>
+<span class="kw">INSERT INTO</span> t_contract VALUES (<span class="str">'C001'</span>, <span class="str">'202503'</span>, <span class="str">'DEPT_A'</span>, <span class="str">'ACTIVE'</span>, 120000, SYSDATE);
+<span class="kw">INSERT INTO</span> t_contract VALUES (<span class="str">'C002'</span>, <span class="str">'202503'</span>, <span class="str">'DEPT_A'</span>, <span class="str">'ACTIVE'</span>, 150000, SYSDATE);
+<span class="kw">INSERT INTO</span> t_contract VALUES (<span class="str">'C003'</span>, <span class="str">'202503'</span>, <span class="str">'DEPT_A'</span>, <span class="str">'CANCEL'</span>, 80000,  SYSDATE);
+<span class="kw">INSERT INTO</span> t_contract VALUES (<span class="str">'C004'</span>, <span class="str">'202503'</span>, <span class="str">'DEPT_B'</span>, <span class="str">'ACTIVE'</span>, 200000, SYSDATE);
+<span class="kw">INSERT INTO</span> t_contract VALUES (<span class="str">'C005'</span>, <span class="str">'202503'</span>, <span class="str">'DEPT_B'</span>, <span class="str">'ACTIVE'</span>, 180000, SYSDATE);
+<span class="kw">INSERT INTO</span> t_contract VALUES (<span class="str">'C006'</span>, <span class="str">'202503'</span>, <span class="str">'DEPT_B'</span>, <span class="str">'ACTIVE'</span>, 160000, SYSDATE);
+<span class="kw">INSERT INTO</span> t_contract VALUES (<span class="str">'C007'</span>, <span class="str">'202503'</span>, <span class="str">'DEPT_C'</span>, <span class="str">'ACTIVE'</span>, 300000, SYSDATE);
+<span class="kw">INSERT INTO</span> t_contract VALUES (<span class="str">'C008'</span>, <span class="str">'202503'</span>, <span class="str">'DEPT_C'</span>, <span class="str">'ACTIVE'</span>, 250000, SYSDATE);
+<span class="kw">INSERT INTO</span> t_contract VALUES (<span class="str">'C009'</span>, <span class="str">'202503'</span>, <span class="str">'DEPT_C'</span>, <span class="str">'ACTIVE'</span>, 220000, SYSDATE);
+<span class="kw">INSERT INTO</span> t_contract VALUES (<span class="str">'C010'</span>, <span class="str">'202503'</span>, <span class="str">'DEPT_C'</span>, <span class="str">'ACTIVE'</span>, 190000, SYSDATE);
+<span class="kw">COMMIT</span>;
+
+<span class="cm">-- 사업비 원천 데이터</span>
+<span class="kw">INSERT INTO</span> t_cost_source VALUES (<span class="str">'202503'</span>, <span class="str">'COST_001'</span>, <span class="str">'광고선전비'</span>,  1000000, <span class="str">'CONTRACT'</span>);
+<span class="kw">INSERT INTO</span> t_cost_source VALUES (<span class="str">'202503'</span>, <span class="str">'COST_002'</span>, <span class="str">'인건비'</span>,      5000000, <span class="str">'PREMIUM'</span>);
+<span class="kw">INSERT INTO</span> t_cost_source VALUES (<span class="str">'202503'</span>, <span class="str">'COST_003'</span>, <span class="str">'복리후생비'</span>,  300000,  <span class="str">'EQUAL'</span>);
+<span class="kw">COMMIT</span>;</code></div>
+      <div class="tip">CANCEL 상태 계약(C003)을 일부러 포함했습니다. 주니어들이 WHERE status_cd = 'ACTIVE' 조건을 빠뜨리는 실수를 TDD로 잡아내는 연습에 활용하세요.</div>
+    </div>
+  </div>
+
+  <!-- 기초 쿼리 -->
+  <div class="panel" id="tab-basic">
+
+    <div class="section-label">LEVEL 1 — SELECT 기초</div>
+
+    <div class="card">
+      <div class="card-title"><span class="badge b-info">CASE 1</span> &nbsp;전체 조회 + 조건 필터</div>
+      <div class="tdd-row">
+        <div class="tdd-box tdd-red">
+          <div class="tdd-label"><span class="dot dot-red"></span> 검증 쿼리 먼저 (RED)</div>
+          <code><span class="cm">-- 기대: 202503 ACTIVE 계약 = 9건</span>
+<span class="kw">SELECT</span> <span class="kw">CASE</span>
+  <span class="kw">WHEN</span> COUNT(*) = 9 <span class="kw">THEN</span> <span class="str">'PASS'</span>
+  <span class="kw">ELSE</span> <span class="str">'FAIL: '</span> || COUNT(*)
+<span class="kw">END</span> AS test_result
+<span class="kw">FROM</span> t_contract
+<span class="kw">WHERE</span> base_ym   = <span class="str">'202503'</span>
+<span class="kw">AND</span>   status_cd = <span class="str">'ACTIVE'</span>;
+<span class="cm">-- 실행 전: FAIL: 0</span></code>
+        </div>
+        <div class="tdd-box tdd-grn">
+          <div class="tdd-label"><span class="dot dot-grn"></span> 본 쿼리 (GREEN)</div>
+          <code><span class="cm">-- 실제 조회 쿼리</span>
+<span class="kw">SELECT</span>
+    contract_no,
+    dept_cd,
+    premium_amt
+<span class="kw">FROM</span>   t_contract
+<span class="kw">WHERE</span>  base_ym   = <span class="str">'202503'</span>
+<span class="kw">AND</span>    status_cd = <span class="str">'ACTIVE'</span>
+<span class="kw">ORDER BY</span> dept_cd, contract_no;
+<span class="cm">-- 9건 반환 → 검증 쿼리 PASS</span></code>
+        </div>
+      </div>
+      <div class="warn">주니어 흔한 실수 : status_cd 조건 누락 → 10건 반환. 검증 쿼리가 FAIL: 10 을 출력해서 즉시 잡힙니다.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="badge b-info">CASE 2</span> &nbsp;특정 부서 데이터 조회</div>
+      <div class="tdd-row">
+        <div class="tdd-box tdd-red">
+          <div class="tdd-label"><span class="dot dot-red"></span> 검증 쿼리</div>
+          <code><span class="cm">-- 기대: DEPT_B 계약 3건, 합계 540000</span>
+<span class="kw">SELECT</span>
+  <span class="kw">CASE</span> <span class="kw">WHEN</span> cnt = 3
+            <span class="kw">AND</span> tot = 540000
+       <span class="kw">THEN</span> <span class="str">'PASS'</span>
+       <span class="kw">ELSE</span> <span class="str">'FAIL cnt='</span>||cnt||<span class="str">' tot='</span>||tot
+  <span class="kw">END</span> AS test_result
+<span class="kw">FROM</span> (
+  <span class="kw">SELECT</span> COUNT(*) cnt, SUM(premium_amt) tot
+  <span class="kw">FROM</span>   t_contract
+  <span class="kw">WHERE</span>  dept_cd   = <span class="str">'DEPT_B'</span>
+  <span class="kw">AND</span>    base_ym   = <span class="str">'202503'</span>
+  <span class="kw">AND</span>    status_cd = <span class="str">'ACTIVE'</span>
+);</code>
+        </div>
+        <div class="tdd-box tdd-grn">
+          <div class="tdd-label"><span class="dot dot-grn"></span> 본 쿼리</div>
+          <code><span class="kw">SELECT</span>
+    contract_no,
+    dept_cd,
+    premium_amt
+<span class="kw">FROM</span>   t_contract
+<span class="kw">WHERE</span>  dept_cd   = <span class="str">'DEPT_B'</span>
+<span class="kw">AND</span>    base_ym   = <span class="str">'202503'</span>
+<span class="kw">AND</span>    status_cd = <span class="str">'ACTIVE'</span>;
+
+<span class="cm">-- C004: 200000
+-- C005: 180000
+-- C006: 160000
+-- 합계:  540000 → PASS</span></code>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 집계 쿼리 -->
+  <div class="panel" id="tab-agg">
+
+    <div class="section-label">LEVEL 2 — 집계 / GROUP BY</div>
+
+    <div class="card">
+      <div class="card-title"><span class="badge b-warn">CASE 3</span> &nbsp;부서별 계약건수 집계</div>
+      <div class="tdd-row">
+        <div class="tdd-box tdd-red">
+          <div class="tdd-label"><span class="dot dot-red"></span> 검증 쿼리</div>
+          <code><span class="cm">-- 기대: 부서 3개 / 전체합 9건</span>
+<span class="kw">SELECT</span>
+  <span class="kw">CASE</span>
+    <span class="kw">WHEN</span> dept_cnt = 3 <span class="kw">AND</span> total_cnt = 9
+    <span class="kw">THEN</span> <span class="str">'PASS'</span>
+    <span class="kw">ELSE</span> <span class="str">'FAIL dept='</span>||dept_cnt||<span class="str">' tot='</span>||total_cnt
+  <span class="kw">END</span> AS test_result
+<span class="kw">FROM</span> (
+  <span class="kw">SELECT</span>
+    COUNT(<span class="kw">DISTINCT</span> dept_cd) AS dept_cnt,
+    COUNT(*)                 AS total_cnt
+  <span class="kw">FROM</span>   t_contract
+  <span class="kw">WHERE</span>  base_ym   = <span class="str">'202503'</span>
+  <span class="kw">AND</span>    status_cd = <span class="str">'ACTIVE'</span>
+);</code>
+        </div>
+        <div class="tdd-box tdd-grn">
+          <div class="tdd-label"><span class="dot dot-grn"></span> 본 쿼리</div>
+          <code><span class="kw">SELECT</span>
+    dept_cd,
+    COUNT(*)         AS contract_cnt,
+    SUM(premium_amt) AS total_premium
+<span class="kw">FROM</span>   t_contract
+<span class="kw">WHERE</span>  base_ym   = <span class="str">'202503'</span>
+<span class="kw">AND</span>    status_cd = <span class="str">'ACTIVE'</span>
+<span class="kw">GROUP BY</span> dept_cd
+<span class="kw">ORDER BY</span> dept_cd;
+
+<span class="cm">-- DEPT_A: 2건  270000
+-- DEPT_B: 3건  540000
+-- DEPT_C: 4건  960000</span></code>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="badge b-warn">CASE 4</span> &nbsp;집계 후 비율 계산 (Window Function)</div>
+      <div class="tdd-row">
+        <div class="tdd-box tdd-red">
+          <div class="tdd-label"><span class="dot dot-red"></span> 검증 쿼리</div>
+          <code><span class="cm">-- 기대: 모든 부서 비율 합계 = 100</span>
+<span class="kw">SELECT</span>
+  <span class="kw">CASE</span>
+    <span class="kw">WHEN</span> ABS(SUM(alloc_ratio) - 100) &lt; 0.001
+    <span class="kw">THEN</span> <span class="str">'PASS'</span>
+    <span class="kw">ELSE</span> <span class="str">'FAIL: 합계='</span> || SUM(alloc_ratio)
+  <span class="kw">END</span> AS test_result
+<span class="kw">FROM</span> (
+  <span class="kw">SELECT</span>
+    dept_cd,
+    ROUND(
+      COUNT(*) * 100.0 / SUM(COUNT(*)) OVER(), 6
+    ) AS alloc_ratio
+  <span class="kw">FROM</span>   t_contract
+  <span class="kw">WHERE</span>  base_ym   = <span class="str">'202503'</span>
+  <span class="kw">AND</span>    status_cd = <span class="str">'ACTIVE'</span>
+  <span class="kw">GROUP BY</span> dept_cd
+);</code>
+        </div>
+        <div class="tdd-box tdd-grn">
+          <div class="tdd-label"><span class="dot dot-grn"></span> 본 쿼리</div>
+          <code><span class="kw">SELECT</span>
+    dept_cd,
+    COUNT(*)  AS contract_cnt,
+    ROUND(
+      COUNT(*) * 100.0
+      / SUM(COUNT(*)) OVER(), 6
+    )         AS alloc_ratio
+<span class="kw">FROM</span>   t_contract
+<span class="kw">WHERE</span>  base_ym   = <span class="str">'202503'</span>
+<span class="kw">AND</span>    status_cd = <span class="str">'ACTIVE'</span>
+<span class="kw">GROUP BY</span> dept_cd;
+
+<span class="cm">-- DEPT_A: 22.222222%
+-- DEPT_B: 33.333333%
+-- DEPT_C: 44.444444%
+-- 합계:  99.999999 → ABS 비교로 PASS</span></code>
+        </div>
+      </div>
+      <div class="tip">비율 합계 검증은 = 100 이 아니라 ABS(합계 - 100) &lt; 0.001 로 작성해야 합니다. 소수점 반올림 오차로 99.999999가 나올 수 있어요. 이걸 모르면 주니어들이 FAIL을 보고 멘붕합니다.</div>
+    </div>
+
+  </div>
+
+  <!-- 배분 쿼리 -->
+  <div class="panel" id="tab-alloc">
+
+    <div class="section-label">LEVEL 3 — 배분 로직 구현</div>
+
+    <div class="card">
+      <div class="card-title"><span class="badge b-gray">CASE 5</span> &nbsp;계약건수 기준 배분액 계산</div>
+      <div class="code-block"><code><span class="cm">-- COST_001 광고선전비 1,000,000원을 계약건수 비율로 배분</span>
+<span class="cm">-- 기대값 : DEPT_A=222,222 / DEPT_B=333,333 / DEPT_C=444,444</span>
+<span class="cm">-- (소수점 반올림 → 합계 999,999. 차액 1원은 최대 부서에 보정 필요)</span>
+
+<span class="kw">SELECT</span>
+    dept_cd,
+    contract_cnt,
+    alloc_ratio,
+    ROUND(1000000 * alloc_ratio / 100, 0) AS alloc_amt
+<span class="kw">FROM</span> (
+    <span class="kw">SELECT</span>
+        dept_cd,
+        COUNT(*) AS contract_cnt,
+        ROUND(
+            COUNT(*) * 100.0 / SUM(COUNT(*)) OVER(), 6
+        ) AS alloc_ratio
+    <span class="kw">FROM</span>   t_contract
+    <span class="kw">WHERE</span>  base_ym   = <span class="str">'202503'</span>
+    <span class="kw">AND</span>    status_cd = <span class="str">'ACTIVE'</span>
+    <span class="kw">GROUP BY</span> dept_cd
+)
+<span class="kw">ORDER BY</span> dept_cd;</code></div>
+
+      <div class="divider"></div>
+
+      <div class="card-title" style="margin-top:0.75rem;"><span class="badge b-red">핵심 이슈</span> &nbsp;1원 차액 보정 (페니 프라블럼)</div>
+      <div style="font-size:13px;color:#555;line-height:1.7;margin-bottom:10px;">
+        반올림으로 배분액 합계가 원천 금액과 1~2원 차이가 날 수 있습니다. 보험 결산에서는 이 오차가 허용되지 않으므로 반드시 보정 로직이 필요합니다.
+      </div>
+      <div class="code-block"><code><span class="cm">-- 1원 차액 보정 : 마지막 부서에 차액 합산</span>
+<span class="kw">SELECT</span>
+    dept_cd,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> rn = max_rn
+        <span class="kw">THEN</span> 1000000 - SUM(alloc_amt) OVER (
+                 <span class="kw">ORDER BY</span> rn
+                 <span class="kw">ROWS BETWEEN UNBOUNDED PRECEDING AND</span> 1 <span class="kw">PRECEDING</span>)
+        <span class="kw">ELSE</span> alloc_amt
+    <span class="kw">END</span> AS final_amt
+<span class="kw">FROM</span> (
+    <span class="kw">SELECT</span>
+        dept_cd,
+        ROUND(1000000 * alloc_ratio / 100, 0) AS alloc_amt,
+        ROW_NUMBER() OVER (<span class="kw">ORDER BY</span> dept_cd)   AS rn,
+        COUNT(*)     OVER ()                    AS max_rn
+    <span class="kw">FROM</span> (
+        <span class="kw">SELECT</span> dept_cd,
+               ROUND(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER(), 6) AS alloc_ratio
+        <span class="kw">FROM</span>   t_contract
+        <span class="kw">WHERE</span>  base_ym = <span class="str">'202503'</span> <span class="kw">AND</span> status_cd = <span class="str">'ACTIVE'</span>
+        <span class="kw">GROUP BY</span> dept_cd
+    )
+);</code></div>
+      <div class="warn">이 보정 로직을 모르는 주니어가 대부분입니다. TDD 검증 쿼리에서 "배분결과 합계 = 원천금액" 조건을 넣어두면 자동으로 이슈가 드러납니다.</div>
+    </div>
+
+  </div>
+
+  <!-- 검증 쿼리 세트 -->
+  <div class="panel" id="tab-validate">
+    <div class="card">
+      <div class="card-title">배치 실행 전후 필수 검증 쿼리 세트</div>
+      <div style="font-size:13px;color:#555;margin-bottom:12px;">아래 검증 쿼리를 배치 Job의 마지막 Step으로 반드시 실행합니다. 하나라도 FAIL이면 배치를 FAIL 처리합니다.</div>
+
+      <div class="code-block"><code><span class="cm">-- [CHECK 1] 배분 결과 건수 검증 (부서 수만큼 INSERT 되었는지)</span>
+<span class="kw">SELECT</span>
+  <span class="str">'CHECK_1_건수'</span> AS check_nm,
+  <span class="kw">CASE</span>
+    <span class="kw">WHEN</span> COUNT(*) = (
+           <span class="kw">SELECT</span> COUNT(<span class="kw">DISTINCT</span> dept_cd)
+           <span class="kw">FROM</span>   t_contract
+           <span class="kw">WHERE</span>  base_ym = <span class="str">'202503'</span> <span class="kw">AND</span> status_cd = <span class="str">'ACTIVE'</span>)
+    <span class="kw">THEN</span> <span class="str">'PASS'</span> <span class="kw">ELSE</span> <span class="str">'FAIL: '</span> || COUNT(*)
+  <span class="kw">END</span> AS result
+<span class="kw">FROM</span> t_cost_alloc_result
+<span class="kw">WHERE</span> base_ym = <span class="str">'202503'</span> <span class="kw">AND</span> cost_item_cd = <span class="str">'COST_001'</span>
+
+<span class="kw">UNION ALL</span>
+
+<span class="cm">-- [CHECK 2] 배분 금액 합계 = 원천 금액 검증</span>
+<span class="kw">SELECT</span>
+  <span class="str">'CHECK_2_금액합계'</span>,
+  <span class="kw">CASE</span>
+    <span class="kw">WHEN</span> ABS(
+           (SELECT SUM(alloc_amt) FROM t_cost_alloc_result
+            WHERE base_ym = <span class="str">'202503'</span> AND cost_item_cd = <span class="str">'COST_001'</span>)
+           -
+           (SELECT cost_amt FROM t_cost_source
+            WHERE base_ym = <span class="str">'202503'</span> AND cost_item_cd = <span class="str">'COST_001'</span>)
+         ) &lt;= 1                               <span class="cm">-- 1원 오차 허용</span>
+    <span class="kw">THEN</span> <span class="str">'PASS'</span> <span class="kw">ELSE</span> <span class="str">'FAIL: 금액불일치'</span>
+  <span class="kw">END</span>
+<span class="kw">FROM</span> DUAL
+
+<span class="kw">UNION ALL</span>
+
+<span class="cm">-- [CHECK 3] 배분율 합계 = 100 검증</span>
+<span class="kw">SELECT</span>
+  <span class="str">'CHECK_3_비율합계'</span>,
+  <span class="kw">CASE</span>
+    <span class="kw">WHEN</span> ABS(SUM(alloc_ratio) - 100) &lt; 0.001
+    <span class="kw">THEN</span> <span class="str">'PASS'</span> <span class="kw">ELSE</span> <span class="str">'FAIL: '</span> || SUM(alloc_ratio)
+  <span class="kw">END</span>
+<span class="kw">FROM</span> t_cost_alloc_result
+<span class="kw">WHERE</span> base_ym = <span class="str">'202503'</span> <span class="kw">AND</span> cost_item_cd = <span class="str">'COST_001'</span>
+
+<span class="kw">UNION ALL</span>
+
+<span class="cm">-- [CHECK 4] NULL 배분금액 존재 여부</span>
+<span class="kw">SELECT</span>
+  <span class="str">'CHECK_4_NULL체크'</span>,
+  <span class="kw">CASE</span>
+    <span class="kw">WHEN</span> COUNT(*) = 0 <span class="kw">THEN</span> <span class="str">'PASS'</span>
+    <span class="kw">ELSE</span> <span class="str">'FAIL: NULL '</span> || COUNT(*) || <span class="str">'건'</span>
+  <span class="kw">END</span>
+<span class="kw">FROM</span> t_cost_alloc_result
+<span class="kw">WHERE</span> base_ym   = <span class="str">'202503'</span>
+<span class="kw">AND</span>   cost_item_cd = <span class="str">'COST_001'</span>
+<span class="kw">AND</span>   alloc_amt <span class="kw">IS NULL</span>;
+</code></div>
+      <div class="tip">이 4개 CHECK를 Spring Batch의 마지막 Tasklet에 넣어두면, FAIL 항목이 하나라도 있으면 배치 상태를 FAILED로 기록하고 담당자에게 알림을 보내는 구조로 만들 수 있습니다.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">주니어 체크리스트 — 쿼리 작성 전 확인 사항</div>
+      <table>
+        <tr><th>항목</th><th>확인 내용</th><th>안 지키면</th></tr>
+        <tr>
+          <td><strong>status_cd 조건</strong></td>
+          <td>ACTIVE 조건 반드시 포함</td>
+          <td class="result-fail">취소 계약 포함 → 건수/금액 오류</td>
+        </tr>
+        <tr>
+          <td><strong>base_ym 조건</strong></td>
+          <td>기준년월 파라미터 바인딩</td>
+          <td class="result-fail">전체 기간 데이터 집계 → 성능 폭발</td>
+        </tr>
+        <tr>
+          <td><strong>SELECT *</strong></td>
+          <td>필요한 컬럼만 명시</td>
+          <td class="result-fail">불필요한 I/O → 성능 저하</td>
+        </tr>
+        <tr>
+          <td><strong>비율 합계 검증</strong></td>
+          <td>= 100 대신 ABS &lt; 0.001 사용</td>
+          <td class="result-fail">소수점 오차로 FALSE FAIL</td>
+        </tr>
+        <tr>
+          <td><strong>1원 차액 보정</strong></td>
+          <td>마지막 부서에 차액 합산</td>
+          <td class="result-fail">배분 합계 ≠ 원천 금액</td>
+        </tr>
+        <tr>
+          <td><strong>MERGE 사용</strong></td>
+          <td>INSERT 대신 MERGE로 멱등성 확보</td>
+          <td class="result-fail">배치 재실행 시 중복 데이터</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  function switchTab(id) {
+    const ids = ['concept','setup','basic','agg','alloc','validate'];
+    document.querySelectorAll('.tab').forEach((t,i) => {
+      t.classList.toggle('active', ids[i] === id);
+    });
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active');
+  }
+</script>
+</body>
+</html>
