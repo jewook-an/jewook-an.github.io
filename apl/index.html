@@ -1,14 +1,76 @@
 <!DOCTYPE html>
 <html lang="ko">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>기본 HTML 페이지</title>
-  </head>
-  <body>
-    <main>
-      <h1>환영합니다!</h1>
-      <p>이것은 기본 HTML 템플릿입니다.</p>
-    </main>
-  </body>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ABL생명 프로젝트 가이드 메인</title>
+  <link rel="stylesheet" href="apl_todolist.css">
+  <style>
+    .link-item {
+      display: block;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      text-decoration: none;
+      color: #1a1a1a;
+      transition: all 0.2s ease-in-out;
+    }
+    .link-item:hover {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    }
+    .link-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .link-title::after {
+      content: '→';
+      color: #94a3b8;
+      font-size: 18px;
+      transition: transform 0.2s;
+    }
+    .link-item:hover .link-title::after {
+      transform: translateX(4px);
+      color: #3b82f6;
+    }
+    .link-desc {
+      font-size: 13px;
+      color: #64748b;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>ABL생명 프로젝트 가이드</h1>
+  
+  <div class="section">
+    <div class="section-title">문서 바로가기</div>
+    
+    <a href="apl_todolist.html" class="link-item">
+      <div class="link-title">투입준비 Todo List</div>
+      <div class="link-desc">ABL생명 프로젝트 초기 투입 시 필요한 PC 세팅, 선작업, 배치 가이드 및 예제 체크리스트</div>
+    </a>
+    
+    <a href="apl_queryguide.html" class="link-item">
+      <div class="link-title">쿼리 가이드 (Query Guide)</div>
+      <div class="link-desc">프로젝트에서 사용되는 데이터베이스 조회 및 기본 쿼리 작성 방법에 대한 가이드라인</div>
+    </a>
+    
+    <a href="apl_tddexample.html" class="link-item">
+      <div class="link-title">TDD 개발 가이드 (TDD Example)</div>
+      <div class="link-desc">테스트 주도 개발(TDD)을 활용한 안전한 코드 작성 예제 및 테스트 방법 가이드</div>
+    </a>
+  </div>
+</div>
+</body>
 </html>
