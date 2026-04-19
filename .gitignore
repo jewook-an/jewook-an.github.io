@@ -21,3 +21,4 @@ test-results/
 playwright-report/
 
 checklist.txt
+.vscode/settings.json
