@@ -1,0 +1,44 @@
+
+---------------------------------------------------------------------------------
+Database Name : NGS DB (Hos 명 : STG_NGSP)
+
+Temp Table Name 생성
+tmp_NBIPF01_61612057_260731 (tmp_NBIPF01_61612057_260531)
+tmp_NBIPF02_61612057_260731 (tmp_NBIPF02_61612057_260531)
+
+-- TB_PDMGF01([유지]일자관리기본) 활용
+SELECT MAX(SLRC_YM_YMD)
+FROM TB_PDMGF01
+WHERE HOLY_CD = '00'
+    AND SLRC_YM_YMD <= TO_CHAR(SYSDATE - 1, 'YYYYMMDD');
+
+-- TB_NBIPF01_TEMP INSERT
+INSERT INTO tmp_NBIPF01_61612057_260731
+SELECT A.*
+FROM TB_NBIPF01 A
+WHERE OFR_YMD BETWEEN (
+        SELECT MAX(SLRC_YM_YMD)
+        FROM TB_PDMGF01
+        WHERE HOLY_CD = '00'
+            AND SLRC_YM_YMD <= TO_CHAR(SYSDATE - 1, 'YYYYMMDD'))
+    AND TO_CHAR(SYSDATE - 1, 'YYYYMMDD');
+
+COMMIT;
+
+-- TB_NBIPF02_TEMP INSERT
+INSERT INTO tmp_NBIPF02_61612057_260731
+SELECT A.*
+FROM   TB_NBIPF02 A
+WHERE  CONT_NO IN (
+           SELECT CONT_NO
+           FROM   TB_NBIPF01
+           WHERE  OFR_YMD BETWEEN (
+                    SELECT MAX(SLRC_YM_YMD)
+                    FROM TB_PDMGF01
+                    WHERE HOLY_CD = '00'
+                        AND SLRC_YM_YMD <= TO_CHAR(SYSDATE - 1, 'YYYYMMDD'))
+                AND TO_CHAR(SYSDATE - 1, 'YYYYMMDD')
+       );
+
+COMMIT;
+

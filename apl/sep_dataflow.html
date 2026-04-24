@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ABL생명 사업비 배분 시스템 데이터 흐름도</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; background: #f5f5f5; padding: 32px 20px; }
+  h1 { text-align: center; font-size: 18px; font-weight: 600; color: #222; margin-bottom: 8px; }
+  .subtitle { text-align: center; font-size: 13px; color: #888; margin-bottom: 36px; }
+  .diagram { display: flex; flex-direction: column; align-items: center; gap: 0; max-width: 760px; margin: 0 auto; position: relative; }
+
+  /* Main flow column */
+  .flow-row { display: flex; align-items: center; width: 100%; justify-content: center; gap: 16px; margin-bottom: 0; }
+  .step-num { width: 24px; text-align: right; font-size: 13px; color: #aaa; flex-shrink: 0; }
+  .node { width: 300px; border-radius: 10px; padding: 10px 16px; border: 1.5px solid; cursor: default; transition: filter 0.15s; }
+  .node:hover { filter: brightness(0.96); }
+  .node-title { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+  .node-sub { font-size: 12px; opacity: 0.75; }
+
+  .side-wrap { width: 200px; flex-shrink: 0; display: flex; align-items: center; gap: 0; }
+  .side-node { border-radius: 10px; padding: 10px 14px; border: 1.5px solid; font-size: 13px; flex: 1; }
+  .side-title { font-weight: 600; margin-bottom: 2px; }
+  .side-sub { font-size: 11px; opacity: 0.75; }
+  .side-arrow { display: flex; align-items: center; padding: 0 6px; }
+  .side-arrow svg { display: block; }
+
+  .arrow-wrap { display: flex; align-items: center; justify-content: center; height: 32px; }
+  .arrow-wrap svg { display: block; }
+  .spacer { width: 24px; flex-shrink: 0; }
+  .side-spacer { width: 200px; flex-shrink: 0; }
+
+  /* Colors */
+  .gray  { background: #f3f2ef; border-color: #c9c8c2; }
+  .gray  .node-title { color: #3d3d3a; }
+  .gray  .node-sub   { color: #6b6b67; }
+
+  .blue  { background: #e6f1fb; border-color: #85b7eb; }
+  .blue  .node-title { color: #0c447c; }
+  .blue  .node-sub   { color: #185fa5; }
+
+  .teal  { background: #e1f5ee; border-color: #5dcaa5; }
+  .teal  .node-title { color: #085041; }
+  .teal  .node-sub   { color: #0f6e56; }
+
+  .purple { background: #eeedfe; border-color: #afa9ec; }
+  .purple .node-title { color: #3c3489; }
+  .purple .node-sub   { color: #534ab7; }
+
+  .coral { background: #faece7; border-color: #f0997b; }
+  .coral .node-title { color: #712b13; }
+  .coral .node-sub   { color: #993c1d; }
+
+  .green { background: #eaf3de; border-color: #97c459; }
+  .green .node-title { color: #27500a; }
+  .green .node-sub   { color: #3b6d11; }
+
+  .amber { background: #faeeda; border-color: #ef9f27; }
+  .amber .side-title { color: #633806; }
+  .amber .side-sub   { color: #854f0b; }
+
+  .legend { display: flex; justify-content: center; gap: 24px; margin-top: 32px; flex-wrap: wrap; font-size: 12px; color: #666; }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-dot { width: 12px; height: 12px; border-radius: 3px; border: 1.5px solid; }
+</style>
+</head>
+<body>
+<h1>ABL생명 사업비 배분 시스템 — 데이터 흐름도</h1>
+<p class="subtitle">Oracle DB 환경 기준 | Kick-off 2025.04.10</p>
+
+<div class="diagram">
+
+  <!-- Row 1 -->
+  <div class="flow-row">
+    <div class="step-num">①</div>
+    <div class="node gray">
+      <div class="node-title">기간계 / 거래계</div>
+      <div class="node-sub">원천 거래 데이터 발생</div>
+    </div>
+    <div class="side-spacer"></div>
+  </div>
+
+  <!-- Arrow 1→2 -->
+  <div class="arrow-wrap">
+    <div style="width:24px"></div>
+    <svg width="300" height="32"><line x1="150" y1="0" x2="150" y2="26" stroke="#aaa" stroke-width="1.5" marker-end="url(#arr)"/><defs><marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#aaa" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs></svg>
+    <div style="width:200px"></div>
+  </div>
+
+  <!-- Row 2 with side box -->
+  <div class="flow-row">
+    <div class="step-num">②</div>
+    <div class="node blue">
+      <div class="node-title">정보계 / Data Mart</div>
+      <div class="node-sub">배분 기초데이터 적재 (Oracle)</div>
+    </div>
+    <div class="side-wrap">
+      <div class="side-arrow">
+        <svg width="44" height="32" style="overflow:visible">
+          <line x1="40" y1="16" x2="4" y2="16" stroke="#ba7517" stroke-width="1.5" marker-end="url(#arr2)"/>
+          <defs><marker id="arr2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#ba7517" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+        </svg>
+      </div>
+      <div class="side-node amber">
+        <div class="side-title">배분 기초데이터</div>
+        <div class="side-sub">통계분석 결과 입력</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Arrow 2→3 -->
+  <div class="arrow-wrap">
+    <div style="width:24px"></div>
+    <svg width="300" height="32"><line x1="150" y1="0" x2="150" y2="26" stroke="#aaa" stroke-width="1.5" marker-end="url(#arr)"/></svg>
+    <div style="width:200px"></div>
+  </div>
+
+  <!-- Row 3 -->
+  <div class="flow-row">
+    <div class="step-num">③</div>
+    <div class="node teal">
+      <div class="node-title">가정 시스템</div>
+      <div class="node-sub">사업비 배분 가정 테이블 변환</div>
+    </div>
+    <div class="side-spacer"></div>
+  </div>
+
+  <!-- Arrow 3→4 -->
+  <div class="arrow-wrap">
+    <div style="width:24px"></div>
+    <svg width="300" height="32"><line x1="150" y1="0" x2="150" y2="26" stroke="#aaa" stroke-width="1.5" marker-end="url(#arr)"/></svg>
+    <div style="width:200px"></div>
+  </div>
+
+  <!-- Row 4 -->
+  <div class="flow-row">
+    <div class="step-num">④</div>
+    <div class="node purple">
+      <div class="node-title">계리 엔진</div>
+      <div class="node-sub">모델 포인트 계산 (5,000건 단위 분할 처리)</div>
+    </div>
+    <div class="side-spacer"></div>
+  </div>
+
+  <!-- Arrow 4→5 -->
+  <div class="arrow-wrap">
+    <div style="width:24px"></div>
+    <svg width="300" height="32"><line x1="150" y1="0" x2="150" y2="26" stroke="#aaa" stroke-width="1.5" marker-end="url(#arr)"/></svg>
+    <div style="width:200px"></div>
+  </div>
+
+  <!-- Row 5 -->
+  <div class="flow-row">
+    <div class="step-num">⑤</div>
+    <div class="node coral">
+      <div class="node-title">부채결산 시스템</div>
+      <div class="node-sub">사업비 반영 부채 산출</div>
+    </div>
+    <div class="side-spacer"></div>
+  </div>
+
+  <!-- Arrow 5→6 -->
+  <div class="arrow-wrap">
+    <div style="width:24px"></div>
+    <svg width="300" height="32"><line x1="150" y1="0" x2="150" y2="26" stroke="#aaa" stroke-width="1.5" marker-end="url(#arr)"/></svg>
+    <div style="width:200px"></div>
+  </div>
+
+  <!-- Row 6 -->
+  <div class="flow-row">
+    <div class="step-num">⑥</div>
+    <div class="node green">
+      <div class="node-title">회계 시스템</div>
+      <div class="node-sub">최종 회계 처리 반영</div>
+    </div>
+    <div class="side-spacer"></div>
+  </div>
+
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#f3f2ef;border-color:#c9c8c2"></div>원천 시스템</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#e6f1fb;border-color:#85b7eb"></div>정보계 / 데이터마트</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#faeeda;border-color:#ef9f27"></div>배분 기초데이터 (외부 입력)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#e1f5ee;border-color:#5dcaa5"></div>가정 시스템</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#eeedfe;border-color:#afa9ec"></div>계리 엔진</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#faece7;border-color:#f0997b"></div>부채결산</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#eaf3de;border-color:#97c459"></div>회계</div>
+</div>
+
+</body>
+</html>
